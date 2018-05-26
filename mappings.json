@@ -1,0 +1,12 @@
+{
+  "mappings": {
+    "sales_pipeline_event": {
+      "properties": {
+        "event_name":    { "type": "keyword"  },
+        "product_id":     { "type": "integer"  },
+        "prospect_id":      { "type": "keyword" },
+        "additional_info":  { "type": "text" }
+      }
+    }
+  }
+}
