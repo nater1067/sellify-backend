@@ -9,7 +9,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.sse.ServerSentEvent
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Directive0, Route}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.routing.{BroadcastRoutingLogic, Router}
 import akka.stream.ActorMaterializer
@@ -126,9 +126,20 @@ object SalesPipelineEventWebServer extends JsonSupport {
 
     implicit val salesPipelineEventFormat: RootJsonFormat[SalesPipelineEvent] = jsonFormat6(SalesPipelineEvent)
 
+    val cors: Directive0 = respondWithHeaders(
+      RawHeader("Access-Control-Allow-Origin", "*"),
+      RawHeader("Access-Control-Allow-Headers", "*"),
+      RawHeader("Access-Control-Allow-Methods", "*")
+    )
+
+    options {
+      cors {
+        complete("")
+      }
+    } ~
     path("events") {
       get {
-        respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*")) {
+        cors {
           val (sseActor: ActorRef, sseSource: Source[ServerSentEvent, NotUsed]) =
             Source.actorRef[SalesPipelineEvent](10, akka.stream.OverflowStrategy.dropTail)
               .map(s => {
@@ -153,9 +164,9 @@ object SalesPipelineEventWebServer extends JsonSupport {
         }
       } ~
         post {
-          entity(as[SalesPipelineEvent]) { event =>
-            eventsActor ! event.copy(applicationTime = Some(JodaDT.now))
-            respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*")) {
+          cors {
+            entity(as[SalesPipelineEvent]) { event =>
+              eventsActor ! event.copy(applicationTime = Some(JodaDT.now))
               complete("")
             }
           }
