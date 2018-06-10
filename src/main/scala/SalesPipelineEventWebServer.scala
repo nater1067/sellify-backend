@@ -137,6 +137,22 @@ object SalesPipelineEventWebServer extends JsonSupport {
         complete("")
       }
     } ~
+      path("funnel") {
+        get {
+          cors {
+          complete {
+            JsArray(
+              JsObject.apply("name" -> JsString("prospect_reached_landing_page"), "count" -> JsNumber(8)),
+              JsObject.apply("name" -> JsString("prospect_learns_more"), "count" -> JsNumber(7)),
+              JsObject.apply("name" -> JsString("prospect_clicked_buy"), "count" -> JsNumber(3)),
+              JsObject.apply("name" -> JsString("prospect_enters_contact_details"), "count" -> JsNumber(2)),
+              JsObject.apply("name" -> JsString("prospect_attempts_payment"), "count" -> JsNumber(1)),
+              JsObject.apply("name" -> JsString("customer_completed_payment"), "count" -> JsNumber(1))
+            )
+          }
+        }
+      }
+    } ~
     path("events") {
       get {
         cors {
